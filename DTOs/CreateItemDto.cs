@@ -1,0 +1,12 @@
+using System.ComponentModel.DataAnnotations;
+
+namespace Catalog.DTOs{
+    public record CreateItemDto{
+        [Required]
+        public string Name { get; set; }
+
+        [Required]
+        [Range(1, 1000)]
+        public double Price { get; set; }
+    }
+}
