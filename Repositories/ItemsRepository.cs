@@ -3,19 +3,24 @@ using System.Collections.Generic;
 using System.Linq;
 using Catalog.Entities;
 using Catalog.Interfaces;
+using MongoDB.Driver;
 
 namespace Catalog.Repositories{
 
     public class ItemsRepository : IItemsRepository
     {
-        public ItemsRepository()
+        private const string databaseName = "catalog";
+        private const string collectionName = "items";
+        private readonly IMongoCollection<Item> itemsCollection;
+        public ItemsRepository(IMongoClient mongoClient)
         {
-            
+            IMongoDatabase database = mongoClient.GetDatabase(databaseName);
+            itemsCollection = database.GetCollection<Item>(collectionName);
         }
 
         public void CreateItem(Item item)
         {
-            throw new NotImplementedException();
+            itemsCollection.InsertOne(item);
         }
 
         public void DeleteItem(Guid id)
