@@ -48,7 +48,9 @@ namespace Catalog
                 return new MongoClient(settings.ConnectionString);
             });
             services.AddSingleton<IItemsRepository, ItemsRepository>();
-            services.AddControllers();
+            
+            // Allows the compiler to ignore the "async" post fix from method names 
+            services.AddControllers(options => options.SuppressAsyncSuffixInActionNames = false);
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Catalog", Version = "v1" });

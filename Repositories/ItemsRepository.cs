@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Catalog.Entities;
 using Catalog.Interfaces;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace Catalog.Repositories{
@@ -12,35 +14,39 @@ namespace Catalog.Repositories{
         private const string databaseName = "catalog";
         private const string collectionName = "items";
         private readonly IMongoCollection<Item> itemsCollection;
+        private readonly FilterDefinitionBuilder<Item> filterBuilder = Builders<Item>.Filter;
         public ItemsRepository(IMongoClient mongoClient)
         {
             IMongoDatabase database = mongoClient.GetDatabase(databaseName);
             itemsCollection = database.GetCollection<Item>(collectionName);
         }
 
-        public void CreateItem(Item item)
+        public async Task<IEnumerable<Item>> GetItemsAsync()
         {
-            itemsCollection.InsertOne(item);
+            return await itemsCollection.Find(new BsonDocument()).ToListAsync();
         }
 
-        public void DeleteItem(Guid id)
+        public async Task<Item> GetItemAsync(Guid id)
         {
-            throw new NotImplementedException();
+            var filter = filterBuilder.Eq(item => item.Id, id);
+            return await itemsCollection.Find(filter).SingleOrDefaultAsync();
+        }
+        
+        public async Task CreateItemAsync(Item item)
+        {
+            await itemsCollection.InsertOneAsync(item);
+        }
+        
+        public async Task UpdateItemAsync(Item item)
+        {
+            var filter = filterBuilder.Eq(item => item.Id, item.Id);
+            await itemsCollection.ReplaceOneAsync(filter, item);
         }
 
-        public Item GetItem(Guid id)
+        public async Task DeleteItemAsync(Guid id)
         {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<Item> GetItems()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void UpdateItem(Item item)
-        {
-            throw new NotImplementedException();
+            var filter = filterBuilder.Eq(item => item.Id, id);
+            await itemsCollection.DeleteOneAsync(filter);
         }
     }
 }
